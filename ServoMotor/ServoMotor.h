@@ -21,7 +21,8 @@ private:
   int ierr;
   int iloop;
   int setpoint;
-  
+  bool finished;
+
   unsigned long curr_time;
   unsigned long old_time;
   unsigned long dT;
@@ -31,9 +32,6 @@ private:
   float error;
   float old_error;
   int n_report;
-  
-  int SET_A;
-  int SET_B;
   
   int mtr_fwd;
   int mtr_bwd;
@@ -50,8 +48,8 @@ public:
   ServoMotor(int fwdPin, int bwdPin, int potPin);
   void setupMotor();
   void setPID(float p, float i, float d);
-  void setSetpoints(int setA, int setB);
-  void loopMotor();
+  void setSetpoint(int setA);
+  void moveToSetpoint();
 };
 
 #endif
