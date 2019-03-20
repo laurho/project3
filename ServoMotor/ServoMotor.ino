@@ -1,5 +1,9 @@
 #include "ServoMotor.h"
 
+#include "Adafruit_VL53L0X.h"
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+
+
 ServoMotor motor0(6, 9, 1);
 ServoMotor motor1(10, 11, 2);
 ServoMotor motor2(3, 5, 0);
@@ -7,6 +11,14 @@ ServoMotor motor2(3, 5, 0);
 void setup()
 {
   Serial.begin(9600);
+  
+  //Sensor bootup
+  Serial.println("Adafruit VL53L0X test:");
+  if (!lox.begin()) {
+    Serial.println(F("Failed to boot VL53L0X"));
+    Serial.println("Boot failed.");
+  }
+  //
   //Motor 1
   motor0.setupMotor();
   motor0.setPID(0.2, 0, 0.5);
@@ -35,6 +47,33 @@ void loop()
 */
 void searchMode() {
   //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
+  int closest_distance;
+  int angle_of_distance;
+  //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
+  if (millis() - curr_time > DELAY_TIME) {
+    VL53L0X_RangingMeasurementData_t measure;
+
+    Serial.print("Reading a measurement... ");
+    lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
+    
+    if (measure.RangeStatus != 4) {  // phase failures have incorrect data
+      Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
+      closest_distance = 9000;
+      for (int i = 0; i <= 180; i++) {
+        motor2.setSetpoint(i);
+        motor2.moveToSetpoint();
+        if (measure.RangeMilliMeter < closest_distance) {
+          closest_distance = measure.RangeMilliMeter;
+          angle_of_distance = i;
+        }
+      }
+      motor2.setSetpoint(angle_of_distance);
+      motor2.moveToSetpoint();
+    } else {
+      Serial.println(" out of range ");
+    }
+    curr_time = millis();
+  }
 }
 
 
