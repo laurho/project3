@@ -9,7 +9,7 @@
 #define NINT 100            // number of samples to keep for integral control
 #define REPORT_TIME 1000    // time btwn serial port reporting time (ms)
 #define FLIP_TIME 2000      // time btwn flipping btwn setpoints
-#define DELAY_TIME 3      // bandwidth of cntrl loop, controls the delay in loop(), smaller is better
+#define DELAY_TIME 50      // bandwidth of cntrl loop, controls the delay in loop(), smaller is better
 
 class ServoMotor {
 private:
@@ -29,13 +29,7 @@ private:
   unsigned long t_flip;
   unsigned long t_report;
   
-  float error;
-  float old_error;
   int n_report;
-  
-  int mtr_fwd;
-  int mtr_bwd;
-  int pot_pin;
   
   int output_low;
   int output_high;
@@ -50,6 +44,11 @@ public:
   void setPID(float p, float i, float d);
   void setSetpoint(int setA);
   void moveToSetpoint();
+  float error;
+  float old_error;
+  int mtr_fwd;
+  int mtr_bwd;
+  int pot_pin;
 };
 
 #endif
