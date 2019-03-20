@@ -12,7 +12,7 @@ Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 //int SET_B = 54; // second desired position (setpoint B)
 //int SET_C = 75; // third desired position (setpoint C)
 //int SET_D = 90; // fourth desired position (setpoint D)
-
+const float p_gain1 = 0.55;
 const float p_gain = 0.2; // better performance, but makes overshoot .3, 0.006
 const float d_gain = 0.5; // control overshoot .1, 0.00001
 
@@ -61,7 +61,7 @@ int pot_pin2 = A2;
 const int output_low = -30;
 const int output_high = 30;
 const float motor_stop = 0.75;
-const int motor_high = 250;
+const int motor_high = 255;
 const int motor_low = 150;
 
 bool finished0 = false;
@@ -215,17 +215,18 @@ void moveToSetpoint1(int setpoint) {
 
   float dEdT1 = (float) (error1 - old_error1) / dT1;
 
-  float output1 = p_gain * error1 + d_gain * dEdT1;
+  float output1 = p_gain1 * error1 + d_gain * dEdT1;
   output1 = constrain(output1, output_low, output_high);
+  int val;
   if (output1 < -motor_stop) {
     // mtr_fwd
-    int val = map(output1, output_low, 0, motor_low, motor_high); //May need to change with weight
+    val = map(output1, output_low, 0, motor_low, motor_high); //May need to change with weight
     analogWrite(mtr_fwd1, val);
     analogWrite(mtr_bwd1, LOW);
     finished1 = false;
   } else if (output1 > motor_stop) {
     // mtr_bwd
-    int val = map(output1, 0, output_high, motor_low, motor_high); //May need to change with weight
+    val = map(output1, 0, output_high, motor_low, motor_high); //May need to change with weight
     analogWrite(mtr_fwd1, LOW);
     analogWrite(mtr_bwd1, val);
     finished1 = false;
@@ -246,6 +247,7 @@ void moveToSetpoint1(int setpoint) {
     Serial.print("; Err: ");      Serial.print(error1);
     Serial.print("; dEdT: ");     Serial.print(dEdT1);
     Serial.print("; Out: ");      Serial.println(output1);
+    Serial.print("; Motor Power: ");      Serial.println(val);
     t_report1 = curr_time1;
     n_report1 = iloop1;
   }
@@ -306,8 +308,8 @@ void moveToSetpoint2(int setpoint) {
 void loop()
 {
     resetArmDown();
-//  crawlMode();
-  //  delay(2000);
+    crawlMode();
+    delay(2000);
 
   //  while (!finished0) {
   //    moveToSetpoint0(30);
@@ -400,9 +402,9 @@ void loop()
    or a search
 */
 void resetArmDown() {
-  Serial.println("MOTOR ONE");
+  Serial.println("RESET MODE");
   while (!finished1) {
-    moveToSetpoint1(25); //slightly up
+    moveToSetpoint1(60); //slightly up // used to be 25
     delay(3);
     moveToSetpoint2(95);
   }
@@ -438,10 +440,11 @@ void resetArmDown() {
 */
 void crawlMode() {
   //  //Reset to grab the ground
-  Serial.println("RESET ARM");
-  Serial.println("MOTOR ONE");
+//  Serial.println("RESET ARM");
+//  Serial.println("MOTOR ONE");
+  Serial.println("CRAWL MODE");
   while (!finished1) {
-    moveToSetpoint1(25); //slightly up
+    moveToSetpoint1(60); //slightly up
     delay(3);
     moveToSetpoint2(95);
   }
@@ -452,7 +455,7 @@ void crawlMode() {
   Serial.println("CRAWLING");
   Serial.println("MOTOR TWO");
   while (!finished2) {
-    moveToSetpoint2(50); //bent up
+    moveToSetpoint2(40); //bent up
     delay(3);
     moveToSetpoint1(50); //move to angle
   }
