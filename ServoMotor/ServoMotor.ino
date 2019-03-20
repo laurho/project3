@@ -62,7 +62,7 @@ const int output_low = -30;
 const int output_high = 30;
 const float motor_stop = 0.75;
 const int motor_high = 250;
-const int motor_low = 100;
+const int motor_low = 150;
 
 bool finished0 = false;
 bool finished1 = false;
@@ -305,7 +305,8 @@ void moveToSetpoint2(int setpoint) {
 
 void loop()
 {
-  //  resetArmDown();
+    resetArmDown();
+//  crawlMode();
   //  delay(2000);
 
   //  while (!finished0) {
@@ -316,46 +317,46 @@ void loop()
   //
   //  delay(500);
 
-  Serial.println("MOTOR ONE");
-  while (!finished1) {
-    moveToSetpoint1(20);
-    delay(3);
-  }
-  finished1 = false;
-
-  delay(500);
-
-  Serial.println("MOTOR TWO");
-  while (!finished2) {
-    moveToSetpoint2(27);
-    delay(3);
-  }
-  finished2 = false;
-
-  delay(500);
-  //
-  //  while (!finished0) {
-  //    moveToSetpoint0(60);
+  //  Serial.println("MOTOR ONE");
+  //  while (!finished1) {
+  //    moveToSetpoint1(20);
   //    delay(3);
   //  }
-  //  finished0 = false;
+  //  finished1 = false;
+  //
   //  delay(500);
   //
-
-  Serial.println("MOTOR ONE");
-  while (!finished1) {
-    moveToSetpoint1(70);
-    delay(3);
-  }
-  finished1 = false;
-  delay(500);
-  
-  while (!finished2) {
-    moveToSetpoint2(80);
-    delay(3);
-  }
-  finished2 = false;
-  delay(500);
+  //  Serial.println("MOTOR TWO");
+  //  while (!finished2) {
+  //    moveToSetpoint2(27);
+  //    delay(3);
+  //  }
+  //  finished2 = false;
+  //
+  //  delay(500);
+  //  //
+  //  //  while (!finished0) {
+  //  //    moveToSetpoint0(60);
+  //  //    delay(3);
+  //  //  }
+  //  //  finished0 = false;
+  //  //  delay(500);
+  //  //
+  //
+  //  Serial.println("MOTOR ONE");
+  //  while (!finished1) {
+  //    moveToSetpoint1(70);
+  //    delay(3);
+  //  }
+  //  finished1 = false;
+  //  delay(500);
+  //
+  //  while (!finished2) {
+  //    moveToSetpoint2(80);
+  //    delay(3);
+  //  }
+  //  finished2 = false;
+  //  delay(500);
 }
 
 /*
@@ -399,53 +400,70 @@ void loop()
    or a search
 */
 void resetArmDown() {
-  
   Serial.println("MOTOR ONE");
   while (!finished1) {
-    moveToSetpoint1(20);
+    moveToSetpoint1(25); //slightly up
     delay(3);
+    moveToSetpoint2(95);
   }
   finished1 = false;
-
   delay(500);
 
-  Serial.println("MOTOR TWO");
-  while (!finished2) {
-    moveToSetpoint2(27);
-    delay(3);
-  }
-  finished2 = false;
-
-  delay(500);
-  //
-  //  while (!finished0) {
-  //    moveToSetpoint0(60);
+  //  Serial.println("MOTOR TWO");
+  //  while (!finished2) {
+  //    moveToSetpoint2(95); //straight up
   //    delay(3);
   //  }
-  //  finished0 = false;
+  //  finished2 = false;
+  //  delay(500);
+
+  //  Serial.println("MOTOR ONE");
+  //  while (!finished1) {
+  //    moveToSetpoint1(70);
+  //    delay(3);
+  //  }
+  //  finished1 = false;
   //  delay(500);
   //
-
-  Serial.println("MOTOR ONE");
-  while (!finished1) {
-    moveToSetpoint1(70);
-    delay(3);
-  }
-  finished1 = false;
-  delay(500);
-  
-  while (!finished2) {
-    moveToSetpoint2(80);
-    delay(3);
-  }
-  finished2 = false;
-  delay(500);
+  //  while (!finished2) {
+  //    moveToSetpoint2(40);
+  //    delay(3);
+  //  }
+  //  finished2 = false;
+  //  delay(500);
 }
 
 /*
    Crawl in the direction that the arm is currently in.
 */
-//void crawlMode() {
-//  //Reset to grab the ground
-//  resetArmDown();
-//}
+void crawlMode() {
+  //  //Reset to grab the ground
+  Serial.println("RESET ARM");
+  Serial.println("MOTOR ONE");
+  while (!finished1) {
+    moveToSetpoint1(25); //slightly up
+    delay(3);
+    moveToSetpoint2(95);
+  }
+  finished1 = false;
+  finished2 = false;
+  delay(1000);
+
+  Serial.println("CRAWLING");
+  Serial.println("MOTOR TWO");
+  while (!finished2) {
+    moveToSetpoint2(50); //bent up
+    delay(3);
+    moveToSetpoint1(50); //move to angle
+  }
+  finished2 = false;
+  delay(500);
+
+  //  Serial.println("MOTOR ONE");
+  //  while (!finished1) {
+  //    moveToSetpoint1(66); //move to angle
+  //    delay(3);
+  //  }
+  //  finished1 = false;
+  //  delay(500);
+}
