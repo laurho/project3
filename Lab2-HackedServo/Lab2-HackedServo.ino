@@ -13,7 +13,7 @@ int SET_B = 54; // second desired position (setpoint B)
 int SET_C = 75; // third desired position (setpoint C)
 int SET_D = 90; // fourth desired position (setpoint D)
 
-float p_gain = 0.2; // better performance, but makes overshoot .3, 0.006
+float p_gain = 0.6; // better performance, but makes overshoot .3, 0.006
 float d_gain = 0.5; // control overshoot .1, 0.00001
 float i_gain = 0.0; // drift error decrease, stabilize the loop .1, 0.084
 
@@ -31,15 +31,15 @@ float error = 0.0;
 float old_error = 0.0;
 int n_report = 0;
 
-
+//
 int mtr_fwd = 3;
 int mtr_bwd = 11;
 int potentiometer_pin = A0;
-
+//
 //int mtr_fwd = 5;
 //int mtr_bwd = 6;
 //int potentiometer_pin = A1;
-
+//////
 //int mtr_fwd = 9;
 //int mtr_bwd = 10;
 //int potentiometer_pin = A2;
@@ -110,17 +110,17 @@ void loop() {
   if (output < -motor_stop) {
     // mtr_fwd
     int val = map(output, output_low, 0, 80, 250); //May need to change with weight
-//    analogWrite(mtr_fwd, val);
-//    analogWrite(mtr_bwd, LOW);
+    analogWrite(mtr_fwd, val);
+    analogWrite(mtr_bwd, LOW);
   } else if (output > motor_stop) {
     // mtr_bwd
     int val = map(output, 0, output_high, 80, 250); //May need to change with weight
-//    analogWrite(mtr_fwd, LOW);
-//    analogWrite(mtr_bwd, val);
+    analogWrite(mtr_fwd, LOW);
+    analogWrite(mtr_bwd, val);
   } else {
     // output is in a reasonable range, stop the engine
-//    analogWrite(mtr_fwd, LOW);
-//    analogWrite(mtr_bwd, LOW);
+    analogWrite(mtr_fwd, LOW);
+    analogWrite(mtr_bwd, LOW);
   }
 
   delay(DELAY_TIME); //this delay controls the bandwidth of the controller

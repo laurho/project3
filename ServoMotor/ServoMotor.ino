@@ -12,7 +12,7 @@ Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 //int SET_B = 54; // second desired position (setpoint B)
 //int SET_C = 75; // third desired position (setpoint C)
 //int SET_D = 90; // fourth desired position (setpoint D)
-const float p_gain1 = 0.6;
+const float p_gain1 = 3;
 const float p_gain = 0.2; // better performance, but makes overshoot .3, 0.006
 const float d_gain = 0.5; // control overshoot .1, 0.00001
 
@@ -63,7 +63,7 @@ const int output_high = 20;
 const int motor_high = 250;
 const int motor_low = 100;
 const float motor_stop = 0.75;
-const float motor_stop1 = 0.75;
+const float motor_stop1 = 6.0;
 
 bool finished0 = false;
 bool finished1 = false;
@@ -78,13 +78,25 @@ int angle_of_distance = -1;
 void setup()
 {
   Serial.begin(9600);
-
-  //Sensor bootup
-  Serial.println("Adafruit VL53L0X test:");
-  if (!lox.begin()) {
-    Serial.println(F("Failed to boot VL53L0X"));
-    Serial.println("Boot failed.");
-  }
+  //
+  //    //Sensor bootup
+  //    Serial.println("Adafruit VL53L0X test:");
+  //    if (!lox.begin()) {
+  //      Serial.println(F("Failed to boot VL53L0X"));
+  //      Serial.println("Boot failed.");
+  //    }
+  ////   wait until serial port opens for native USB devices
+  //  while (! Serial) {
+  //    delay(1);
+  //  }
+  //
+  //  Serial.println("Adafruit VL53L0X test");
+  //  if (!lox.begin()) {
+  //    Serial.println(F("Failed to boot VL53L0X"));
+  //    while (1);
+  //  }
+  //  // power
+  //  Serial.println(F("VL53L0X API Simple Ranging example\n\n"));
 
   curr_time0 = millis();
   t_flip0 = curr_time0;
@@ -184,15 +196,15 @@ void moveToSetpoint1(int setpoint) {
   float output1 = p_gain1 * error1 + d_gain * dEdT1;
   output1 = constrain(output1, output_low, output_high);
   int val;
-  if (output1 < -motor_stop) {
+  if (output1 < -motor_stop1) {
     // mtr_fwd
-    val = map(output1, output_low, 0, motor_low, motor_high); //May need to change with weight
+    val = map(output1, output_low, 0, 150, motor_high); //May need to change with weight
     analogWrite(mtr_fwd1, val);
     analogWrite(mtr_bwd1, LOW);
     finished1 = false;
-  } else if (output1 > motor_stop) {
+  } else if (output1 > motor_stop1) {
     // mtr_bwd
-    val = map(output1, 0, output_high, motor_low, motor_high); //May need to change with weight
+    val = map(output1, 0, output_high, 150, motor_high); //May need to change with weight
     analogWrite(mtr_fwd1, LOW);
     analogWrite(mtr_bwd1, val);
     finished1 = false;
@@ -275,15 +287,31 @@ void moveToSetpoint2(int setpoint) {
 
 void loop()
 {
-  searchMode();
-//  while (angle_of_distance == -1) {
-//     searchMode(); 
+//  finished1 = false;
+//  while (!finished1) {
+//    moveToSetpoint1(62); // used to be 83, 76
 //  }
-//  Serial.print("Angle of distance: ");
-//  Serial.println(angle_of_distance);
-//  
-////    resetArmDown();
-//  crawlMode();
+  
+//  delay(500);
+//  searchMode();
+//  delay(500);
+  //    while (angle_of_distance == -1) {
+  //       searchMode();
+  //    }
+  //    Serial.print("Angle of distance: ");
+  //    Serial.println(angle_of_distance);
+
+  //    resetArmDown();
+  finished1 = false;
+  while (!finished1) {
+    moveToSetpoint1(80); // used to be 83, 76
+  }
+  delay(1000);
+  finished1 = false;
+  callOver();
+  delay(500);
+  lowFive();
+  //  crawlMode();
   delay(2000);
 }
 
@@ -294,33 +322,35 @@ void loop()
 void searchMode() {
   Serial.println("Beginning Search");
   //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
-  int closest_distance;
-  //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
-  if (millis() - curr_time0 > DELAY_TIME) {
-    VL53L0X_RangingMeasurementData_t measure;
+  //  int closest_distance;
+  //  //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
+  //  if (millis() - curr_time0 > DELAY_TIME) {
+  //    VL53L0X_RangingMeasurementData_t measure;
+  //
+  //    Serial.print("Reading a measurement... ");
+  //    lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
+  ////
+  //    Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
+  //    closest_distance = 9000;
 
-    Serial.print("Reading a measurement... ");
-    lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
-
-    Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
-    closest_distance = 9000;
-
-    for (int i = 10; i <= 90; i++) {
-      moveToSetpoint0(i);
-      delay(10);
-      if (measure.RangeStatus != 4) {  // phase failures have incorrect data
-        if (measure.RangeMilliMeter < closest_distance) {
-          closest_distance = measure.RangeMilliMeter;
-          angle_of_distance = i;
-        }
-        Serial.println(i);
-      } else {
-        Serial.println(" out of range ");
-      }
-    }
-    moveToSetpoint0(angle_of_distance);
-    curr_time0 = millis();
+  for (int i = 10; i <= 90; i++) {
+    moveToSetpoint0(i);
+    delay(10);
+    //      if (measure.RangeStatus != 4) {  // phase failures have incorrect data
+    //        if (measure.RangeMilliMeter < closest_distance) {
+    //          closest_distance = measure.RangeMilliMeter;
+    //          angle_of_distance = i;
+    //        }
+    //        Serial.println(i);
+    //      } else {
+    //        Serial.println(" out of range ");
   }
+  //    }
+  delay(500);
+  //    moveToSetpoint0(angle_of_distance);
+  moveToSetpoint0(54);
+  //    curr_time0 = millis();
+  //  }
 }
 
 
@@ -350,13 +380,54 @@ void resetArmDown() {
   delay(500);
 }
 
+void callOver() {
+  Serial.println("CALL OVER");
+  finished1 = false;
+  while (!finished2) {
+    moveToSetpoint2(53);
+    delay(3);
+  }
+  finished2 = false;
+  while (!finished2) {
+    moveToSetpoint2(95); //slightly up // used to be 25
+  }
+  finished2 = false;
+  while (!finished2) {
+    moveToSetpoint2(53);
+    delay(3);
+  }
+  finished2 = false;
+  while (!finished2) {
+    moveToSetpoint2(95); //slightly up // used to be 25
+  }
+  delay(500);
+  angle_of_distance = -1;
+}
+
+void lowFive() {
+  Serial.println("LOW FIVE");
+  finished2 = false;
+  while (!finished2) {
+    moveToSetpoint2(53);
+    //    delay(3);
+    //    moveToSetpoint1(95); //slightly up // used to be 25
+  }
+  finished1 = false;
+  while (!finished1) {
+    moveToSetpoint1(95); //slightly up // used to be 25
+  }
+  finished1 = false;
+  finished2 = false;
+  angle_of_distance = -1;
+}
+
 /*
    Crawl in the direction that the arm is currently in.
 */
 void crawlMode() {
   Serial.println("CRAWL MODE:DOWN");
   while (!finished2) {
-    moveToSetpoint2(95);
+    moveToSetpoint2(53);
     //    delay(3);
     //    moveToSetpoint1(95); //slightly up // used to be 25
   }
@@ -368,11 +439,19 @@ void crawlMode() {
   delay(500);
 
   Serial.println("CRAWL MODE:UP");
-  while (!finished1) {
+  while (!finished2) {
     moveToSetpoint2(60); //slightly up // used to be 25, 56
     delay(3);
-    moveToSetpoint1(76); // used to be 83
   }
+  finished2 = false;
+  while (!finished2) {
+    moveToSetpoint2(50); //slightly up // used to be 25, 56
+    delay(3);
+  }
+  while (!finished1) {
+    moveToSetpoint1(62); // used to be 83, 76
+  }
+
   finished2 = false;
   finished1 = false;
   delay(500);
