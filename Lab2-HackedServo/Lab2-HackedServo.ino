@@ -119,8 +119,8 @@ void loop() {
 //    analogWrite(mtr_bwd, val);
   } else {
     // output is in a reasonable range, stop the engine
-    analogWrite(mtr_fwd, LOW);
-    analogWrite(mtr_bwd, LOW);
+//    analogWrite(mtr_fwd, LOW);
+//    analogWrite(mtr_bwd, LOW);
   }
 
   delay(DELAY_TIME); //this delay controls the bandwidth of the controller
