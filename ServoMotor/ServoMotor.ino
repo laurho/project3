@@ -12,7 +12,7 @@ Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 //int SET_B = 54; // second desired position (setpoint B)
 //int SET_C = 75; // third desired position (setpoint C)
 //int SET_D = 90; // fourth desired position (setpoint D)
-const float p_gain1 = 0.55;
+const float p_gain1 = 0.75;
 const float p_gain = 0.2; // better performance, but makes overshoot .3, 0.006
 const float d_gain = 0.5; // control overshoot .1, 0.00001
 
@@ -58,11 +58,12 @@ int mtr_fwd2 = 9;
 int mtr_bwd2 = 10;
 int pot_pin2 = A2;
 
-const int output_low = -30;
-const int output_high = 30;
-const float motor_stop = 0.75;
+const int output_low = -20;
+const int output_high = 20;
 const int motor_high = 255;
-const int motor_low = 150;
+const int motor_low = 100;
+const float motor_stop = 0.75;
+const float motor_stop1 = 6.0;
 
 bool finished0 = false;
 bool finished1 = false;
@@ -307,94 +308,44 @@ void moveToSetpoint2(int setpoint) {
 
 void loop()
 {
-    resetArmDown();
-    crawlMode();
-    delay(2000);
-
-  //  while (!finished0) {
-  //    moveToSetpoint0(30);
-  //    delay(3);
-  //  }
-  //  finished0 = false;
-  //
-  //  delay(500);
-
-  //  Serial.println("MOTOR ONE");
-  //  while (!finished1) {
-  //    moveToSetpoint1(20);
-  //    delay(3);
-  //  }
-  //  finished1 = false;
-  //
-  //  delay(500);
-  //
-  //  Serial.println("MOTOR TWO");
-  //  while (!finished2) {
-  //    moveToSetpoint2(27);
-  //    delay(3);
-  //  }
-  //  finished2 = false;
-  //
-  //  delay(500);
-  //  //
-  //  //  while (!finished0) {
-  //  //    moveToSetpoint0(60);
-  //  //    delay(3);
-  //  //  }
-  //  //  finished0 = false;
-  //  //  delay(500);
-  //  //
-  //
-  //  Serial.println("MOTOR ONE");
-  //  while (!finished1) {
-  //    moveToSetpoint1(70);
-  //    delay(3);
-  //  }
-  //  finished1 = false;
-  //  delay(500);
-  //
-  //  while (!finished2) {
-  //    moveToSetpoint2(80);
-  //    delay(3);
-  //  }
-  //  finished2 = false;
-  //  delay(500);
+//  resetArmDown();
+  //    crawlMode();
+  searchMode();
+  delay(2000);
 }
 
 /*
    Start searching for the closest area. End on a rotation
    to the place that is closest.
 */
-//void searchMode() {
-//  //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
-//  int closest_distance;
-//  int angle_of_distance;
-//  //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
-//  if (millis() - curr_time0 > DELAY_TIME) {
-//    VL53L0X_RangingMeasurementData_t measure;
-//
-//    Serial.print("Reading a measurement... ");
-//    lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
-//
-//    if (measure.RangeStatus != 4) {  // phase failures have incorrect data
-//      Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
-//      closest_distance = 9000;
-//      for (int i = 0; i <= 180; i++) {
-//        motor2.setSetpoint(i);
-//        motor2.moveToSetpoint();
-//        if (measure.RangeMilliMeter < closest_distance) {
-//          closest_distance = measure.RangeMilliMeter;
-//          angle_of_distance = i;
-//        }
-//      }
-//      motor2.setSetpoint(angle_of_distance);
-//      motor2.moveToSetpoint();
-//    } else {
-//      Serial.println(" out of range ");
-//    }
-//    curr_time = millis();
-//  }
-//}
+void searchMode() {
+  //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
+  int closest_distance;
+  int angle_of_distance;
+  //Rotate motor0, bring motor1 and 3 to a semi lifted straight arm
+  if (millis() - curr_time0 > DELAY_TIME) {
+    VL53L0X_RangingMeasurementData_t measure;
+
+    Serial.print("Reading a measurement... ");
+    lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
+
+    if (measure.RangeStatus != 4) {  // phase failures have incorrect data
+      Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
+      closest_distance = 9000;
+      for (int i = 0; i <= 180; i++) {
+        moveToSetpoint0(i);
+        if (measure.RangeMilliMeter < closest_distance) {
+          closest_distance = measure.RangeMilliMeter;
+          angle_of_distance = i;
+        }
+      }
+      moveToSetpoint0(angle_of_distance);
+    } else {
+      Serial.println(" out of range ");
+    }
+    curr_time0 = millis();
+  }
+}
 
 
 /*
@@ -402,37 +353,23 @@ void loop()
    or a search
 */
 void resetArmDown() {
-  Serial.println("RESET MODE");
+  Serial.println("RESET MODE:UP");
   while (!finished1) {
-    moveToSetpoint1(60); //slightly up // used to be 25
+    moveToSetpoint2(46);
     delay(3);
-    moveToSetpoint2(95);
+    moveToSetpoint1(30); //slightly up // used to be 25
   }
   finished1 = false;
-  delay(500);
+  delay(2000);
 
-  //  Serial.println("MOTOR TWO");
-  //  while (!finished2) {
-  //    moveToSetpoint2(95); //straight up
-  //    delay(3);
-  //  }
-  //  finished2 = false;
-  //  delay(500);
-
-  //  Serial.println("MOTOR ONE");
-  //  while (!finished1) {
-  //    moveToSetpoint1(70);
-  //    delay(3);
-  //  }
-  //  finished1 = false;
-  //  delay(500);
-  //
-  //  while (!finished2) {
-  //    moveToSetpoint2(40);
-  //    delay(3);
-  //  }
-  //  finished2 = false;
-  //  delay(500);
+  Serial.println("RESET MODE:DOWN");
+  while (!finished2) {
+    moveToSetpoint1(56); //slightly up // used to be 25
+    delay(3);
+    moveToSetpoint2(83);
+  }
+  finished2 = false;
+  delay(2000);
 }
 
 /*
@@ -440,8 +377,8 @@ void resetArmDown() {
 */
 void crawlMode() {
   //  //Reset to grab the ground
-//  Serial.println("RESET ARM");
-//  Serial.println("MOTOR ONE");
+  //  Serial.println("RESET ARM");
+  //  Serial.println("MOTOR ONE");
   Serial.println("CRAWL MODE");
   while (!finished1) {
     moveToSetpoint1(60); //slightly up

@@ -32,13 +32,13 @@ float old_error = 0.0;
 int n_report = 0;
 
 
-//int mtr_fwd = 3;
-//int mtr_bwd = 11;
-//int potentiometer_pin = A0;
+int mtr_fwd = 3;
+int mtr_bwd = 11;
+int potentiometer_pin = A0;
 
-int mtr_fwd = 5;
-int mtr_bwd = 6;
-int potentiometer_pin = A1;
+//int mtr_fwd = 5;
+//int mtr_bwd = 6;
+//int potentiometer_pin = A1;
 
 //int mtr_fwd = 9;
 //int mtr_bwd = 10;
